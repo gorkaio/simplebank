@@ -55,17 +55,17 @@ func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 const listTranfers = `-- name: ListTranfers :many
 SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
 WHERE
-    (CASE WHEN $1 != 0 THEN from_account_id = $1 ELSE TRUE END) AND
-    (CASE WHEN $2 != 0 THEN to_account_id = $2 ELSE TRUE END)
+    (CASE WHEN $1::bigint != 0 THEN from_account_id = $1::bigint ELSE TRUE END) AND
+    (CASE WHEN $2::bigint != 0 THEN to_account_id = $2::bigint ELSE TRUE END)
 ORDER BY id
 LIMIT $4 OFFSET $3
 `
 
 type ListTranfersParams struct {
-	FromAccountID interface{} `json:"from_account_id"`
-	ToAccountID   interface{} `json:"to_account_id"`
-	Offset        int32       `json:"offset"`
-	Limit         int32       `json:"limit"`
+	FromAccountID int64 `json:"from_account_id"`
+	ToAccountID   int64 `json:"to_account_id"`
+	Offset        int32 `json:"offset"`
+	Limit         int32 `json:"limit"`
 }
 
 // TODO this should use sqlc.narg instead of checking zero values, but narg does not work for some reason :/

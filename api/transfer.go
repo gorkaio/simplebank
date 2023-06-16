@@ -27,19 +27,19 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.TransferTxParams{
+	arg := db.CreateTransferTxParams{
 		FromAccountID: req.FromAccountID,
 		ToAccountID: req.ToAccountID,
 		Amount: req.Amount,
 	}
 
-	result, err := server.store.TransferTx(ctx, arg)
+	result, err := server.store.CreateTransferTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, result.Transfer)
 }
 
 type getTransferRequest struct {
@@ -69,8 +69,8 @@ func (server *Server) getTransfer(ctx *gin.Context) {
 type listTransfersRequest struct {
 	FromAccountID int64 `form:"from_account_id"`
 	ToAccountID int64 `form:"to_account_id"`
-	PageID int32 `form:"page_id" binding:"required,min=1`
-	PageSize int32 `form:"page_size" binding:"required,min=5,max=10`
+	PageID int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
 func (server *Server) listTransfers(ctx *gin.Context) {

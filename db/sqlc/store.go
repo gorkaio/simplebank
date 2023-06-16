@@ -8,7 +8,7 @@ import (
 
 type Store interface {
 	Querier
-	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+	CreateTransferTx(ctx context.Context, arg CreateTransferTxParams) (CreateTransferTxResult, error)
 }
 
 type SQLStore struct {
@@ -41,13 +41,13 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 	return tx.Commit()
 }
 
-type TransferTxParams struct {
+type CreateTransferTxParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID int64 `json:"to_account_id"`
 	Amount int64 `json:"amount"`
 }
 
-type TransferTxResult struct {
+type CreateTransferTxResult struct {
 	Transfer Transfer `json:"transfer"`
 	FromAccount Account `json:"from_account"`
 	ToAccount Account `json:"to_account"`
@@ -61,8 +61,8 @@ type TransferTxResult struct {
 //	- create entry record for to_account with positive amount
 //	- update from_account balance
 //	- update to_account balance
-func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
-	var result TransferTxResult
+func (store *SQLStore) CreateTransferTx(ctx context.Context, arg CreateTransferTxParams) (CreateTransferTxResult, error) {
+	var result CreateTransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error

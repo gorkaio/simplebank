@@ -95,6 +95,21 @@ func (mr *MockStoreMockRecorder) CreateTransfer(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockStore)(nil).CreateTransfer), arg0, arg1)
 }
 
+// CreateTransferTx mocks base method.
+func (m *MockStore) CreateTransferTx(arg0 context.Context, arg1 db.CreateTransferTxParams) (db.CreateTransferTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTransferTx", arg0, arg1)
+	ret0, _ := ret[0].(db.CreateTransferTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTransferTx indicates an expected call of CreateTransferTx.
+func (mr *MockStoreMockRecorder) CreateTransferTx(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransferTx", reflect.TypeOf((*MockStore)(nil).CreateTransferTx), arg0, arg1)
+}
+
 // DeleteAccount mocks base method.
 func (m *MockStore) DeleteAccount(arg0 context.Context, arg1 int64) error {
 	m.ctrl.T.Helper()
@@ -227,21 +242,6 @@ func (m *MockStore) ListTranfers(arg0 context.Context, arg1 db.ListTranfersParam
 func (mr *MockStoreMockRecorder) ListTranfers(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTranfers", reflect.TypeOf((*MockStore)(nil).ListTranfers), arg0, arg1)
-}
-
-// TransferTx mocks base method.
-func (m *MockStore) TransferTx(arg0 context.Context, arg1 db.TransferTxParams) (db.TransferTxResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TransferTx", arg0, arg1)
-	ret0, _ := ret[0].(db.TransferTxResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// TransferTx indicates an expected call of TransferTx.
-func (mr *MockStoreMockRecorder) TransferTx(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransferTx", reflect.TypeOf((*MockStore)(nil).TransferTx), arg0, arg1)
 }
 
 // UpdateAccount mocks base method.
