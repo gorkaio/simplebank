@@ -67,6 +67,8 @@ func (server *Server) getTransfer(ctx *gin.Context) {
 }
 
 type listTransfersRequest struct {
+	FromAccountID int64 `form:"from_account_id"`
+	ToAccountID int64 `form:"to_account_id"`
 	PageID int32 `form:"page_id" binding:"required,min=1`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10`
 }
@@ -77,8 +79,10 @@ func (server *Server) listTransfers(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	
+	fmt.Println(req.FromAccountID, req.ToAccountID)
 	transfers, err := server.store.ListTranfers(ctx, db.ListTranfersParams{
+		FromAccountID: req.FromAccountID,
+		ToAccountID: req.ToAccountID,
 		Limit: req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	})

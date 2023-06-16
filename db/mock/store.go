@@ -229,36 +229,6 @@ func (mr *MockStoreMockRecorder) ListTranfers(arg0, arg1 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTranfers", reflect.TypeOf((*MockStore)(nil).ListTranfers), arg0, arg1)
 }
 
-// ListTransfersFromAccount mocks base method.
-func (m *MockStore) ListTransfersFromAccount(arg0 context.Context, arg1 db.ListTransfersFromAccountParams) ([]db.Transfer, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListTransfersFromAccount", arg0, arg1)
-	ret0, _ := ret[0].([]db.Transfer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListTransfersFromAccount indicates an expected call of ListTransfersFromAccount.
-func (mr *MockStoreMockRecorder) ListTransfersFromAccount(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTransfersFromAccount", reflect.TypeOf((*MockStore)(nil).ListTransfersFromAccount), arg0, arg1)
-}
-
-// ListTransfersToAccount mocks base method.
-func (m *MockStore) ListTransfersToAccount(arg0 context.Context, arg1 db.ListTransfersToAccountParams) ([]db.Transfer, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListTransfersToAccount", arg0, arg1)
-	ret0, _ := ret[0].([]db.Transfer)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListTransfersToAccount indicates an expected call of ListTransfersToAccount.
-func (mr *MockStoreMockRecorder) ListTransfersToAccount(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTransfersToAccount", reflect.TypeOf((*MockStore)(nil).ListTransfersToAccount), arg0, arg1)
-}
-
 // TransferTx mocks base method.
 func (m *MockStore) TransferTx(arg0 context.Context, arg1 db.TransferTxParams) (db.TransferTxResult, error) {
 	m.ctrl.T.Helper()

@@ -54,101 +54,28 @@ func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 
 const listTranfers = `-- name: ListTranfers :many
 SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
+WHERE
+    (CASE WHEN $1 != 0 THEN from_account_id = $1 ELSE TRUE END) AND
+    (CASE WHEN $2 != 0 THEN to_account_id = $2 ELSE TRUE END)
 ORDER BY id
-LIMIT $1 OFFSET $2
+LIMIT $4 OFFSET $3
 `
 
 type ListTranfersParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	FromAccountID interface{} `json:"from_account_id"`
+	ToAccountID   interface{} `json:"to_account_id"`
+	Offset        int32       `json:"offset"`
+	Limit         int32       `json:"limit"`
 }
 
+// TODO this should use sqlc.narg instead of checking zero values, but narg does not work for some reason :/
 func (q *Queries) ListTranfers(ctx context.Context, arg ListTranfersParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, listTranfers, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Transfer{}
-	for rows.Next() {
-		var i Transfer
-		if err := rows.Scan(
-			&i.ID,
-			&i.FromAccountID,
-			&i.ToAccountID,
-			&i.Amount,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listTransfersFromAccount = `-- name: ListTransfersFromAccount :many
-SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
-WHERE from_account_id = $1
-ORDER BY id
-LIMIT $2 OFFSET $3
-`
-
-type ListTransfersFromAccountParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-	Limit         int32 `json:"limit"`
-	Offset        int32 `json:"offset"`
-}
-
-func (q *Queries) ListTransfersFromAccount(ctx context.Context, arg ListTransfersFromAccountParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, listTransfersFromAccount, arg.FromAccountID, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Transfer{}
-	for rows.Next() {
-		var i Transfer
-		if err := rows.Scan(
-			&i.ID,
-			&i.FromAccountID,
-			&i.ToAccountID,
-			&i.Amount,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listTransfersToAccount = `-- name: ListTransfersToAccount :many
-SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
-WHERE to_account_id = $1
-ORDER BY id
-LIMIT $2 OFFSET $3
-`
-
-type ListTransfersToAccountParams struct {
-	ToAccountID int64 `json:"to_account_id"`
-	Limit       int32 `json:"limit"`
-	Offset      int32 `json:"offset"`
-}
-
-func (q *Queries) ListTransfersToAccount(ctx context.Context, arg ListTransfersToAccountParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, listTransfersToAccount, arg.ToAccountID, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listTranfers,
+		arg.FromAccountID,
+		arg.ToAccountID,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}

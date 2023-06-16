@@ -84,13 +84,13 @@ func TestListTransfersFromAccount(t *testing.T) {
 		createRandomTransferForAccounts(t, account_from, account_to)
 	}
 
-	arg := ListTransfersFromAccountParams{
+	arg := ListTranfersParams{
 		FromAccountID: account_from.ID,
 		Limit: 5,
 		Offset: 5,
 	}
 
-	transfers, err := testQueries.ListTransfersFromAccount(context.Background(), arg)
+	transfers, err := testQueries.ListTranfers(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, transfers, 5)
 
@@ -111,13 +111,41 @@ func TestListTransfersToAccount(t *testing.T) {
 		createRandomTransferForAccounts(t, account_from, account_to)
 	}
 
-	arg := ListTransfersToAccountParams{
+	arg := ListTranfersParams{
 		ToAccountID: account_to.ID,
 		Limit: 5,
 		Offset: 5,
 	}
 
-	transfers, err := testQueries.ListTransfersToAccount(context.Background(), arg)
+	transfers, err := testQueries.ListTranfers(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, transfers, 5)
+
+	for _, transfer := range transfers {
+		require.NotEmpty(t, transfer)
+		require.Equal(t, transfer.ToAccountID, account_to.ID)
+	}
+}
+
+func TestListTransfersBetweenAccounts(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		createRandomTransfer(t)
+	}
+
+	account_to := createRandomAccount(t)
+	account_from := createRandomAccount(t)
+	for i := 0; i < 10; i++ {
+		createRandomTransferForAccounts(t, account_from, account_to)
+	}
+
+	arg := ListTranfersParams{
+		FromAccountID: account_from.ID,
+		ToAccountID: account_to.ID,
+		Limit: 5,
+		Offset: 5,
+	}
+
+	transfers, err := testQueries.ListTranfers(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, transfers, 5)
 

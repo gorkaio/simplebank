@@ -10,18 +10,10 @@ SELECT * FROM transfers
 WHERE id = $1 LIMIT 1;
 
 -- name: ListTranfers :many
+-- TODO this should use sqlc.narg instead of checking zero values, but narg does not work for some reason :/
 SELECT * FROM transfers
+WHERE
+    (CASE WHEN sqlc.arg(from_account_id) != 0 THEN from_account_id = sqlc.arg(from_account_id) ELSE TRUE END) AND
+    (CASE WHEN sqlc.arg(to_account_id) != 0 THEN to_account_id = sqlc.arg(to_account_id) ELSE TRUE END)
 ORDER BY id
-LIMIT $1 OFFSET $2;
-
--- name: ListTransfersFromAccount :many
-SELECT * FROM transfers
-WHERE from_account_id = $1
-ORDER BY id
-LIMIT $2 OFFSET $3;
-
--- name: ListTransfersToAccount :many
-SELECT * FROM transfers
-WHERE to_account_id = $1
-ORDER BY id
-LIMIT $2 OFFSET $3;
+LIMIT sqlc.arg('limit') OFFSET sqlc.arg('offset');
