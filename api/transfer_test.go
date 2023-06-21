@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/gorkaio/simplebank/db/mock"
 	db "github.com/gorkaio/simplebank/db/sqlc"
@@ -25,24 +26,18 @@ func TestCreateTransferAPI(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		req_body      string
+		body      gin.H
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
-			req_body: fmt.Sprintf(
-				`{
-					"from_account_id": %d,
-					"to_account_id": %d,
-					"currency": "%s",
-					"amount": %d
-				}`,
-				account_from.ID,
-				account_to.ID,
-				currency,
-				transfer.Amount,
-			),
+			body: gin.H{
+				"from_account_id": account_from.ID,
+				"to_account_id": account_to.ID,
+				"currency": currency,
+				"amount": transfer.Amount,
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), account_from.ID).
@@ -74,14 +69,10 @@ func TestCreateTransferAPI(t *testing.T) {
 		},
 		{
 			name: "BadRequest",
-			req_body: fmt.Sprintf(
-				`{
-					"currency": "%s",
-					"amount": %d
-				}`,
-				currency,
-				transfer.Amount,
-			),
+			body: gin.H{
+				"currency": currency,
+				"amount": transfer.Amount,
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
@@ -96,18 +87,12 @@ func TestCreateTransferAPI(t *testing.T) {
 		},
 		{
 			name: "InternalErrorOnValidation",
-			req_body: fmt.Sprintf(
-				`{
-					"from_account_id": %d,
-					"to_account_id": %d,
-					"currency": "%s",
-					"amount": %d
-				}`,
-				account_from.ID,
-				account_to.ID,
-				currency,
-				transfer.Amount,
-			),
+			body: gin.H{
+				"from_account_id": account_from.ID,
+				"to_account_id": account_to.ID,
+				"currency": currency,
+				"amount": transfer.Amount,
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), account_from.ID).
@@ -120,18 +105,12 @@ func TestCreateTransferAPI(t *testing.T) {
 		},
 		{
 			name: "InternalErrorOnTx",
-			req_body: fmt.Sprintf(
-				`{
-					"from_account_id": %d,
-					"to_account_id": %d,
-					"currency": "%s",
-					"amount": %d
-				}`,
-				account_from.ID,
-				account_to.ID,
-				currency,
-				transfer.Amount,
-			),
+			body: gin.H{
+				"from_account_id": account_from.ID,
+				"to_account_id": account_to.ID,
+				"currency": currency,
+				"amount": transfer.Amount,
+			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), account_from.ID).
@@ -169,7 +148,9 @@ func TestCreateTransferAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			body := []byte(tc.req_body)
+			body, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+
 			request, err := http.NewRequest(http.MethodPost, "/transfers", bytes.NewBuffer(body))
 			require.NoError(t, err)
 

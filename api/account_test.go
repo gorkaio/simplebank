@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/gorkaio/simplebank/db/mock"
 	db "github.com/gorkaio/simplebank/db/sqlc"
@@ -22,20 +23,16 @@ func TestCreateAccountAPI(t *testing.T) {
 
 	testCases := []struct{
 		name string
-		req_body string
+		body gin.H
 		buildStubs func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
-			req_body: fmt.Sprintf(
-				`{
-					"owner": "%s",
-					"currency": "%s"
-				}`,
-				account.Owner,
-				account.Currency,
-			),
+			body: gin.H{
+				"owner": account.Owner,
+				"currency": account.Currency,
+			},
 			buildStubs: func (store *mockdb.MockStore)  {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Eq(db.CreateAccountParams{Owner: account.Owner, Currency: account.Currency})).
@@ -49,14 +46,10 @@ func TestCreateAccountAPI(t *testing.T) {
 		},
 		{
 			name: "InternalServerError",
-			req_body: fmt.Sprintf(
-				`{
-					"owner": "%s",
-					"currency": "%s"
-				}`,
-				account.Owner,
-				account.Currency,
-			),
+			body: gin.H{
+				"owner": account.Owner,
+				"currency": account.Currency,
+			},
 			buildStubs: func (store *mockdb.MockStore)  {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
@@ -69,12 +62,9 @@ func TestCreateAccountAPI(t *testing.T) {
 		},
 		{
 			name: "BadRequestWithoutOwner",
-			req_body: fmt.Sprintf(
-				`{
-					"currency": "%s"
-				}`,
-				account.Currency,
-			),
+			body: gin.H{
+				"currency": account.Currency,
+			},
 			buildStubs: func (store *mockdb.MockStore)  {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Eq(gomock.Any())).
@@ -86,12 +76,9 @@ func TestCreateAccountAPI(t *testing.T) {
 		},
 		{
 			name: "BadRequestWithoutCurrency",
-			req_body: fmt.Sprintf(
-				`{
-					"owner": "%s"
-				}`,
-				account.Owner,
-			),
+			body: gin.H{
+				"owner": account.Owner,
+			},
 			buildStubs: func (store *mockdb.MockStore)  {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Eq(gomock.Any())).
@@ -103,14 +90,10 @@ func TestCreateAccountAPI(t *testing.T) {
 		},
 		{
 			name: "BadRequestWithInvalidCurrency",
-			req_body: fmt.Sprintf(
-				`{
-					"owner": "%s",
-					"currency": "%s"
-				}`,
-				account.Owner,
-				"___",
-			),
+			body: gin.H{
+				"owner": account.Owner,
+				"currency": "___",
+			},
 			buildStubs: func (store *mockdb.MockStore)  {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Eq(gomock.Any())).
@@ -135,7 +118,9 @@ func TestCreateAccountAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			body := []byte(tc.req_body)
+			body, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+			
 			request, err := http.NewRequest(http.MethodPost, "/accounts", bytes.NewBuffer(body))
 			require.NoError(t, err)
 		
